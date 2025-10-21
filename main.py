@@ -1,12 +1,12 @@
 import math
 from typing import List, Optional, Union
-
 import databases
 import sqlalchemy
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from fastapi.responses import JSONResponse
+from utils import calculate_distance
 
 DATABASE_URL = "sqlite:///./pois.db"
 database = databases.Database(DATABASE_URL)
@@ -56,16 +56,6 @@ async def startup():
 @app.on_event("shutdown")
 async def shutdown():
     await database.disconnect()
-    
-def calculate_distance(lat1, lon1, lat2, lon2):
-    R = 6371000
-    phi1 = math.radians(lat1)
-    phi2 = math.radians(lat2)
-    delta_phi = math.radians(lat2 - lat1)
-    delta_lambda = math.radians(lon2 - lon1)
-    a = math.sin(delta_phi / 2) ** 2 + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
 
 def create_api_response(code: int, message: str, data: Union[dict, list, None] = None):
     return JSONResponse(
